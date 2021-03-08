@@ -1,0 +1,91 @@
+---
+title: "Analyzing Elk Movement and Location Using GPS Collar Data"
+author: "Megan Whetzel"
+date: "3/07/2021"
+output: 
+  html_document:
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Description of Data and Database Structure
+
+```{r elk, echo=FALSE, fig.align = 'right', out.height = '40%', out.width= '40%'}
+knitr::include_graphics("elk.png")
+```
+
+
+## Description of data
+I chose to use collar data from a study done in Canada on elk movement. The data was taken from MoveBank and includes basic information. I plan to use the elk ID to ensure points are matched to each individual elk and their corresponding location data. This is captured in latitude/longitude. These points have a timestamp as well as the ambient temperature and elevation captured as the height above the ellipsoid recorded at the time of the location being taken. 
+
+I also plan to use geospatial data such as: 
+
+* NDVI (Normalized Difference Vegetation Index)
+* elevation
+* historic fire data (if applicable)
+
+The geospatial data will help me compare elk movement and location choice to other factors in the environment that may be impacting movement or influencing selection. I chose to keep the data structure simple because I intend to analyze this location data as a stand-in for GPS data I collect or use in my future Master's research project.
+
+## Description of structure
+I structured my database very simply (*see image below*) because of the simplicity of the elk movement dataset. I will make one table within my database that holds all of the chosen data. When I pull in the geospatial data, I can connect the latitude/longitude locations by merging them into a "geom" field in order to run spatial queries. 
+
+
+### **Database Diagram** 
+```{r figure, echo=FALSE, fig.align='center', fig.cap="Image of simple database structure (single table) of elk movement"}
+knitr::include_graphics("database_structure.png")
+```
+
+I will be using PostgreSQL and PostGIS to work with my converted GPS points and load raster data for futher analysis.  
+
+  
+*I am working on installing these programs onto my computer and getting them set up properly to use with geospatial data!*
+
+## Building the Database
+First, to build the database using RSQLite, I will install the packages necessary for analyzing the data.
+```{r packages, echo=TRUE, eval=FALSE}
+install.packages("DBI")
+install.packages("tidyverse")
+install.packages("lubridate")
+```
+
+```{r library, echo=TRUE, eval=FALSE}
+library(DBI)
+library(tidyverse)
+library(lubridate)
+```
+
+
+Next, I will need to connect to the created database (already in SQLite). 
+
+```{r connect, echo=TRUE, eval=FALSE}
+elk_movement_db <- dbConnect(RSQLite::SQLite(), "/Users/Megan/Desktop/Rep_Sci/Elk_Movement_Project/elk_movement.db")
+```
+
+Next, I am able to create queries by using the code below:
+(**However, the table is also already created within my database through SQL**)
+```{r query, echo=TRUE, eval=FALSE}
+dbExecute(elk_movement_db, "CREATE TABLE elk_gps_data (
+elk_id varchar(4) NOT NULL,
+tag_id varchar(7) NOT NULL,
+longitude double,
+latitude double,
+timestamp double,
+temp_c float,
+height_above_ellipsoid_m float,
+PRIMARY KEY (tag_id)
+);")
+```
+
+
+And then I can load data directly from the CSV for use in my table:
+```{r csv, echo=TRUE, eval=FALSE}
+elk_movement <- read.csv("/Users/Megan/Desktop/Rep_Sci/Elk_Movement_Project/elk_movement/processed_data/elk_gps_data.csv", 
+                   stringsAsFactors = FALSE) 
+```
+
+
+  
+**To see more of my work on GitHub, click [here](https://github.com/meganwhetzel)**

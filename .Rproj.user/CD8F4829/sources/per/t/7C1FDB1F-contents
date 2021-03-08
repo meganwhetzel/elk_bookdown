@@ -1,0 +1,18 @@
+--- 
+title: "My First Bookdown"
+author: "Megan Whetzel"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "This is an example of how to build a book using bookdown." 
+---
+
+# Introduction
+
+This example book will show how to use bookdown to put together digital books. We are going to use some work we did on the Palmer Penguins dataset for this project.
+
+Chapter \@ref(penguins) is about making some exploratory plots.
+
